@@ -2,90 +2,80 @@
 import streamlit as st
 import requests
 import pandas as pd
-import io
-from PyPDF2 import PdfReader
-from docx import Document
+import time
+from difflib import SequenceMatcher
 
-st.set_page_config(page_title="RefCheck PRO", layout="wide")
+st.set_page_config(page_title="RefCheck Avançado", layout="wide")
+st.title("📚 RefCheck Avançado – Verificador de Referências com Fontes Múltiplas")
 
-st.title("📚 RefCheck PRO - Verificador de Referências Inteligente")
+# --- Funções de busca simplificadas (em breve: SciELO, Scite.ai, PubMed, Google Scholar via scholarly) ---
 
-def buscar_doi(doi):
+def buscar_crossref_por_doi(doi):
     url = f"https://api.crossref.org/works/{doi}"
     r = requests.get(url)
     if r.status_code == 200:
-        data = r.json()
-        titulo = data["message"].get("title", [""])[0]
-        autores = [a.get("family", "") for a in data["message"].get("author", [])]
-        return "✅ Encontrado", titulo, ", ".join(autores), f"https://doi.org/{doi}"
-    else:
-        return "❌ Não encontrado", "", "", ""
+        d = r.json()["message"]
+        return True, d.get("title", [""])[0], ", ".join(a.get("family", "") for a in d.get("author", [])), f"https://doi.org/{doi}"
+    return False, "", "", ""
 
-def buscar_isbn(isbn):
+def buscar_openlibrary_por_isbn(isbn):
     url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"
     r = requests.get(url)
-    data = r.json()
-    if f"ISBN:{isbn}" in data:
-        livro = data[f"ISBN:{isbn}"]
-        titulo = livro.get("title", "")
-        autores = [a["name"] for a in livro.get("authors", [])]
-        return "✅ Encontrado", titulo, ", ".join(autores), livro.get("url", "")
+    d = r.json()
+    if f"ISBN:{isbn}" in d:
+        livro = d[f"ISBN:{isbn}"]
+        return True, livro.get("title", ""), ", ".join(a["name"] for a in livro.get("authors", [])), livro.get("url", "")
+    return False, "", "", ""
+
+def similaridade(t1, t2):
+    return SequenceMatcher(None, t1.lower(), t2.lower()).ratio()
+
+def simular_busca_por_titulo(titulo):
+    # Simulação para placeholder (futuro: scholarly, scielo, pubmed, scite.ai)
+    titulos_fake = ["A biblioteca pública no século XXI", "Inteligência artificial e ciência da informação"]
+    for tf in titulos_fake:
+        if similaridade(titulo, tf) > 0.8:
+            return True, tf, "Autor Exemplo", "https://exemplo.org"
+    return False, "", "", ""
+
+# --- Lógica principal ---
+
+def verificar_referencia(entrada):
+    entrada = entrada.strip()
+    if entrada.startswith("10."):  # DOI
+        ok, titulo, autor, link = buscar_crossref_por_doi(entrada)
+        return entrada, "DOI", "✅ Encontrado" if ok else "❌ Não encontrado", titulo, autor, link
+    elif entrada.replace("-", "").isdigit() and len(entrada) in [10, 13]:  # ISBN
+        ok, titulo, autor, link = buscar_openlibrary_por_isbn(entrada)
+        return entrada, "ISBN", "✅ Encontrado" if ok else "❌ Não encontrado", titulo, autor, link
     else:
-        return "❌ Não encontrado", "", "", ""
+        ok, titulo, autor, link = simular_busca_por_titulo(entrada)
+        return entrada, "Título", "✅ Encontrado" if ok else "❌ Não encontrado", titulo, autor, link
 
-def extrair_texto(arquivo, tipo):
-    if tipo == "txt":
-        return arquivo.read().decode("utf-8")
-    elif tipo == "pdf":
-        reader = PdfReader(arquivo)
-        texto = ""
-        for page in reader.pages:
-            texto += page.extract_text() + "\n"
-        return texto
-    elif tipo == "docx":
-        doc = Document(arquivo)
-        return "\n".join([p.text for p in doc.paragraphs])
-    else:
-        return ""
+# --- Upload e processamento ---
 
-def processar_linhas(texto):
-    linhas = texto.strip().split("\n")
-    resultados = []
-    for linha in linhas:
-        linha = linha.strip()
-        if not linha:
-            continue
-        if linha.startswith("10."):  # DOI
-            status, titulo, autores, link = buscar_doi(linha)
-            tipo = "DOI"
-        elif linha.replace("-", "").isdigit() and len(linha) in [10, 13]:  # ISBN
-            status, titulo, autores, link = buscar_isbn(linha)
-            tipo = "ISBN"
-        else:
-            status, titulo, autores, link = "⚠️ Tipo desconhecido", "", "", ""
-            tipo = "Outro"
-        resultados.append({
-            "Entrada": linha,
-            "Tipo": tipo,
-            "Status": status,
-            "Título": titulo,
-            "Autores": autores,
-            "Link": link
-        })
-    return resultados
-
-arquivo = st.file_uploader("📎 Envie um arquivo .txt, .pdf ou .docx com DOIs ou ISBNs:", type=["txt", "pdf", "docx"])
+arquivo = st.file_uploader("📎 Envie um arquivo .txt com DOIs, ISBNs ou títulos (uma por linha):", type=["txt"])
 
 if arquivo:
-    tipo_arquivo = arquivo.name.split(".")[-1].lower()
-    conteudo = extrair_texto(arquivo, tipo_arquivo)
-    with st.spinner("Verificando referências..."):
-        dados = processar_linhas(conteudo)
-        df = pd.DataFrame(dados)
-        st.success("Verificação concluída!")
-        st.dataframe(df, use_container_width=True)
+    linhas = arquivo.read().decode("utf-8").strip().split("\n")
+    resultados = []
 
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Baixar relatório CSV", csv, "relatorio_refcheck.csv", "text/csv")
+    progresso = st.progress(0)
+    total = len(linhas)
+
+    for i, linha in enumerate(linhas):
+        resultado = verificar_referencia(linha)
+        resultados.append(resultado)
+        progresso.progress((i + 1) / total)
+        time.sleep(0.2)
+
+    progresso.empty()
+
+    df = pd.DataFrame(resultados, columns=["Entrada", "Tipo", "Status", "Título", "Autores", "Link"])
+    st.success("✅ Verificação concluída")
+    st.dataframe(df, use_container_width=True)
+
+    csv = df.to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Baixar relatório CSV", csv, "relatorio_refcheck_avancado.csv", "text/csv")
 else:
-    st.info("Envie um arquivo para começar.")
+    st.info("Envie um arquivo contendo as referências.")

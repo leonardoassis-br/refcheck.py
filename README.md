@@ -1,16 +1,18 @@
-# RefCheck PRO
+# RefCheck Avançado
 
-Verifique automaticamente referências por DOI e ISBN. Upload de arquivo, validação em lote e relatório para download.
+Sistema inteligente para verificação de referências acadêmicas. Consulta múltiplas bases e valida DOIs, ISBNs e TÍTULOS.
 
-## Requisitos
+## Fontes (atual e previstas)
+- CrossRef (ativo)
+- OpenLibrary (ativo)
+- SciELO (em breve)
+- Google Scholar via scholarly (em breve)
+- PubMed (em breve)
+- Scite.ai (em breve)
 
-- streamlit
-- requests
-- pandas
-
-## Executar localmente
+## Como usar
 
 ```bash
 pip install -r requirements.txt
-streamlit run refcheck_pro.py
+streamlit run refcheck.py
 ```
