@@ -1,11 +1,3 @@
 streamlit
 requests
-python-docx
-PyMuPDF
-fpdf
-beautifulsoup4
-lxml
-fuzzywuzzy
-python-Levenshtein
-scholarly
-biopython
+pandas
