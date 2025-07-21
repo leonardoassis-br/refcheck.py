@@ -1,3 +1,2 @@
-# Arquivo temporário para RefCheck com barra de progresso e visual melhor
-# (o código completo final será incorporado nas próximas partes)
-print("Este é um espaço reservado. A versão final será carregada em breve.")
+
+[em construção — esta célula será atualizada com a versão final completa que inclui todas as partes do refcheck.py com barra de progresso, visual limpo, e verificação em múltiplas fontes]
