@@ -1,5 +1,3 @@
-# RefCheck CGB/UNESP - Verificador Inteligente de Referências com IA
-
 import requests
 import streamlit as st
 import re
