@@ -88,7 +88,26 @@ def buscar_scholar_por_titulo(titulo):
     return "❌ Não encontrado", "", "", "", ""
 
 # Função central
-def verificar_referencia(entrada):
+
+def verificar_referencia(entrada, scite_api_key=""):
+    entrada = entrada.strip()
+    if entrada.startswith("10."):
+        return (entrada,) + buscar_crossref(entrada)
+    elif entrada.replace("-", "").isdigit() and len(entrada) in [10, 13]:
+        return (entrada,) + buscar_openlibrary(entrada)
+
+    fontes = [
+        lambda t: buscar_pubmed_por_titulo(t),
+        lambda t: buscar_scholar_por_titulo(t),
+        lambda t: buscar_scielo_por_titulo(t),
+        lambda t: buscar_scite_por_titulo(t, scite_api_key)
+    ]
+    for fonte in fontes:
+        status, origem, titulo, autor, link = fonte(entrada)
+        if status.startswith("✅"):
+            return (entrada, status, origem, titulo, autor, link)
+    return (entrada, "❌ Não encontrado", "", "", "", "")
+
     entrada = entrada.strip()
     if entrada.startswith("10."):
         return (entrada,) + buscar_crossref(entrada)
