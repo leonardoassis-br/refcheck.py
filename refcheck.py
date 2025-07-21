@@ -3,6 +3,8 @@ import streamlit as st
 import requests
 import pandas as pd
 import io
+from PyPDF2 import PdfReader
+from docx import Document
 
 st.set_page_config(page_title="RefCheck PRO", layout="wide")
 
@@ -31,11 +33,28 @@ def buscar_isbn(isbn):
     else:
         return "❌ Não encontrado", "", "", ""
 
+def extrair_texto(arquivo, tipo):
+    if tipo == "txt":
+        return arquivo.read().decode("utf-8")
+    elif tipo == "pdf":
+        reader = PdfReader(arquivo)
+        texto = ""
+        for page in reader.pages:
+            texto += page.extract_text() + "\n"
+        return texto
+    elif tipo == "docx":
+        doc = Document(arquivo)
+        return "\n".join([p.text for p in doc.paragraphs])
+    else:
+        return ""
+
 def processar_linhas(texto):
     linhas = texto.strip().split("\n")
     resultados = []
     for linha in linhas:
         linha = linha.strip()
+        if not linha:
+            continue
         if linha.startswith("10."):  # DOI
             status, titulo, autores, link = buscar_doi(linha)
             tipo = "DOI"
@@ -55,10 +74,11 @@ def processar_linhas(texto):
         })
     return resultados
 
-arquivo = st.file_uploader("📎 Envie um arquivo .txt com DOIs ou ISBNs (uma por linha):", type=["txt"])
+arquivo = st.file_uploader("📎 Envie um arquivo .txt, .pdf ou .docx com DOIs ou ISBNs:", type=["txt", "pdf", "docx"])
 
 if arquivo:
-    conteudo = arquivo.read().decode("utf-8")
+    tipo_arquivo = arquivo.name.split(".")[-1].lower()
+    conteudo = extrair_texto(arquivo, tipo_arquivo)
     with st.spinner("Verificando referências..."):
         dados = processar_linhas(conteudo)
         df = pd.DataFrame(dados)
