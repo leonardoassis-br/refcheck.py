@@ -3,8 +3,9 @@ requests
 python-docx
 PyMuPDF
 fpdf
-scholarly
 beautifulsoup4
 lxml
+scholarly
 fuzzywuzzy
 python-Levenshtein
+biopython
