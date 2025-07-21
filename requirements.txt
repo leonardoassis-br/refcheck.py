@@ -3,3 +3,8 @@ requests
 python-docx
 PyMuPDF
 fpdf
+scholarly
+beautifulsoup4
+lxml
+fuzzywuzzy
+python-Levenshtein
