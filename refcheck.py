@@ -54,7 +54,20 @@ def verificar_referencia(entrada):
 
 # --- Upload e processamento ---
 
-arquivo = st.file_uploader("📎 Envie um arquivo .txt com DOIs, ISBNs ou títulos (uma por linha):", type=["txt"])
+
+def extrair_texto(arquivo, tipo):
+    if tipo == "txt":
+        return arquivo.read().decode("utf-8")
+    elif tipo == "pdf":
+        reader = PdfReader(arquivo)
+        return "\n".join(page.extract_text() for page in reader.pages if page.extract_text())
+    elif tipo == "docx":
+        doc = Document(arquivo)
+        return "\n".join(p.text for p in doc.paragraphs)
+    return ""
+
+arquivo = st.file_uploader("📎 Envie um arquivo .txt, .pdf ou .docx com DOIs, ISBNs ou títulos (um por linha):", type=["txt", "pdf", "docx"])
+
 
 if arquivo:
     linhas = arquivo.read().decode("utf-8").strip().split("\n")
