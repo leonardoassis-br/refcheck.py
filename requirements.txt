@@ -3,3 +3,6 @@ requests
 pandas
 python-docx
 PyPDF2
+scholarly
+
+beautifulsoup4
