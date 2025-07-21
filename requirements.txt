@@ -1,2 +1,5 @@
 streamlit
 requests
+python-docx
+PyMuPDF
+fpdf
