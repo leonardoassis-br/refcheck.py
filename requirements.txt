@@ -5,7 +5,5 @@ PyMuPDF
 fpdf
 beautifulsoup4
 lxml
-scholarly
 fuzzywuzzy
 python-Levenshtein
-biopython

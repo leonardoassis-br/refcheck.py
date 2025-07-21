@@ -1,27 +1,18 @@
-# RefCheck - CGB UNESP
+# RefCheck - Versão Leve (CGB UNESP)
 
-Este projeto permite verificar automaticamente se as referências citadas em um texto ou lista (em .txt, .pdf, .docx ou colado manualmente) existem de fato, com base nas principais bases de dados científicas.
+Esta é a versão leve do RefCheck, sem bibliotecas pesadas como `scholarly` (Google Scholar) e `biopython` (PubMed), garantindo carregamento rápido no Streamlit Cloud.
 
 ## Funcionalidades:
-- Extração automática de DOI, ISBN, título e autor
-- Verificação em:
-  - CrossRef
-  - Scite.ai
-  - OpenLibrary
-  - SciELO
-  - Google Scholar
-  - PubMed
-- Apresentação visual clara (ícones, cores e status)
+- Entrada via texto ou upload (.txt, .pdf, .docx)
+- Verificação automática de referências:
+  - DOI (CrossRef)
+  - ISBN (OpenLibrary)
+  - DOI via Scite.ai
+  - Título/autor via SciELO
+- Barra de progresso e resultado visual
 - Geração de relatório em PDF
-- Barra de progresso e tempo estimado de checagem
 
 ## Como usar:
-1. Instale o Streamlit:
-   pip install streamlit
-
-2. Execute localmente:
-   streamlit run refcheck.py
-
-3. Ou envie para o [Streamlit Cloud](https://streamlit.io/cloud) com um repositório público.
-
-Desenvolvido para a CGB/UNESP por Leonardo Assis com suporte de IA.
+- Suba esse conteúdo no seu repositório GitHub
+- Acesse o [Streamlit Cloud](https://streamlit.io/cloud)
+- Escolha o repositório e o arquivo `refcheck.py`
