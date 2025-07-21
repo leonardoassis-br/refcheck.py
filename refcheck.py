@@ -85,7 +85,7 @@ def ler_docx(arquivo):
     doc = docx.Document(arquivo)
     return "\n".join([par.text for par in doc.paragraphs])
 
-# === Relatório PDF ===
+# === Relatório PDF corrigido ===
 
 def gerar_relatorio_pdf(resultados):
     pdf = FPDF()
@@ -102,12 +102,12 @@ def gerar_relatorio_pdf(resultados):
         else:
             pdf.cell(200, 10, txt=f"{item['mensagem']}", ln=True)
         pdf.ln(5)
-    buffer = BytesIO()
-    pdf.output(buffer)
-    buffer.seek(0)
-    return buffer
+
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+    return BytesIO(pdf_bytes)
 
 # === Interface Streamlit ===
+
 st.title("🔎 RefCheck - Verificador de Referências | CGB UNESP")
 st.markdown("Verifique automaticamente se as referências citadas em seu texto existem e estão registradas em fontes confiáveis.")
 
